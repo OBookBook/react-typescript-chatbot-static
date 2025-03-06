@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>チャットボット</title>
+    <style>
+      /* スタイルを改善 */
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+      }
+
+      .chat-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+      }
+
+      .chat-header {
+        background-color: #4a6cf7;
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .chat-header h3 {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      #chatbox {
+        height: 350px;
+        border: 1px solid #e0e0e0;
+        overflow-y: scroll;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-left: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+      }
+
+      .message-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .user-message,
+      .bot-message {
+        max-width: 80%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        margin-bottom: 10px;
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #4a6cf7;
+        color: white;
+        border-bottom-right-radius: 5px;
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background-color: #e9e9eb;
+        color: #333;
+        border-bottom-left-radius: 5px;
+      }
+
+      .input-area {
+        display: flex;
+        padding: 10px;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 10px 10px;
+      }
+
+      #userInput {
+        flex-grow: 1;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        outline: none;
+        font-size: 14px;
+      }
+
+      #sendButton {
+        background-color: #4a6cf7;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-left: 10px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s;
+      }
+
+      #sendButton:hover {
+        background-color: #3a5ce5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h3>AIアシスタント</h3>
+        <span id="toggleChat">▼</span>
+      </div>
+      <div id="chatbox" class="message-container"></div>
+      <div class="input-area">
+        <input type="text" id="userInput" placeholder="メッセージを入力..." />
+        <button id="sendButton">➤</button>
+      </div>
+    </div>
+
+    <script>
+      const chatbox = document.getElementById("chatbox");
+      const userInput = document.getElementById("userInput");
+      const sendButton = document.getElementById("sendButton");
+      const toggleChat = document.getElementById("toggleChat");
+      const chatHeader = document.querySelector(".chat-header");
+
+      // チャットの表示/非表示を切り替える
+      chatHeader.addEventListener("click", () => {
+        const chatContent = document.querySelector("#chatbox");
+        const inputArea = document.querySelector(".input-area");
+
+        if (chatContent.style.display === "none") {
+          chatContent.style.display = "flex";
+          inputArea.style.display = "flex";
+          toggleChat.textContent = "▼";
+        } else {
+          chatContent.style.display = "none";
+          inputArea.style.display = "none";
+          toggleChat.textContent = "▲";
+        }
+      });
+
+      // Enterキーでメッセージを送信
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+
+      sendButton.addEventListener("click", sendMessage);
+
+      function sendMessage() {
+        const userMessage = userInput.value.trim();
+        if (userMessage === "") return;
+
+        // ユーザーメッセージを表示
+        const userDiv = document.createElement("div");
+        userDiv.className = "user-message";
+        userDiv.textContent = userMessage;
+        chatbox.appendChild(userDiv);
+
+        userInput.value = "";
+
+        // ボットの応答を表示
+        setTimeout(() => {
+          const botResponse = getBotResponse(userMessage);
+          const botDiv = document.createElement("div");
+          botDiv.className = "bot-message";
+          botDiv.textContent = botResponse;
+          chatbox.appendChild(botDiv);
+
+          chatbox.scrollTop = chatbox.scrollHeight; // スクロールを下に
+        }, 500); // 少し遅延を入れて自然な会話感を出す
+      }
+
+      function getBotResponse(message) {
+        // より会話的な応答ロジック
+        if (message.includes("こんにちは")) {
+          return "こんにちは！どういったご用件でしょうか？お手伝いできることがあれば教えてください。";
+        } else if (message.includes("元気") || message.includes("調子")) {
+          return "私は元気です！あなたはどうですか？今日はいい一日を過ごしていますか？";
+        } else if (
+          message.includes("さようなら") ||
+          message.includes("バイバイ")
+        ) {
+          return "さようなら！またいつでも話しかけてくださいね。良い一日をお過ごしください！";
+        } else if (message.includes("ありがとう")) {
+          return "どういたしまして！他にも何かお手伝いできることがあれば、お気軽にどうぞ。";
+        } else if (message.includes("名前")) {
+          return "私はAIアシスタントです。あなたのお手伝いをするために存在しています。";
+        } else if (message.includes("天気")) {
+          return "天気についてですね。残念ながら、私はリアルタイムの天気情報にアクセスできません。天気予報アプリをご確認いただくことをお勧めします。";
+        } else if (message.includes("趣味") || message.includes("好き")) {
+          return "私の趣味は会話をすることです！あなたの趣味は何ですか？";
+        } else {
+          return "申し訳ありませんが、よく理解できませんでした。もう少し詳しく教えていただけますか？";
+        }
+      }
+
+      // 初期メッセージを表示
+      window.onload = () => {
+        setTimeout(() => {
+          const botDiv = document.createElement("div");
+          botDiv.className = "bot-message";
+          botDiv.textContent =
+            "こんにちは！何かお手伝いできることはありますか？";
+          chatbox.appendChild(botDiv);
+        }, 1000);
+      };
+    </script>
+  </body>
+</html>
